@@ -17,6 +17,7 @@ class AuthState {
 
   bool get isAuthenticated => user != null;
   bool get isAdmin => user?.isAdmin ?? false;
+  bool get isGuest => user?.isGuest ?? false;
 
   AuthState copyWith({
     UserModel? user,
@@ -58,6 +59,23 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isLoading: false,
         isInitialized: true,
       );
+    }
+  }
+
+  // Continue as Guest (Testing Mode)
+  Future<bool> continueAsGuest() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+    try {
+      final repository = _ref.read(authRepositoryProvider);
+      final guest = await repository.startGuestSession();
+      state = state.copyWith(user: guest, isLoading: false);
+      return true;
+    } catch (_) {
+      state = state.copyWith(
+        user: UserModel.guestUser,
+        isLoading: false,
+      );
+      return true;
     }
   }
 

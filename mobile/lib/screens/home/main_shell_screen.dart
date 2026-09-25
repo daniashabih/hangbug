@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../core/constants/app_colors.dart';
 import '../../providers/auth_provider.dart';
+import '../../widgets/floating_bottom_nav.dart';
 import '../../widgets/network_status_banner.dart';
 
 class MainShellScreen extends ConsumerStatefulWidget {
@@ -43,31 +43,12 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
     final isAdmin = authState.isAdmin;
     final currentIndex = widget.navigationShell.currentIndex;
 
-    final navItems = <BottomNavigationBarItem>[
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.home_outlined),
-        activeIcon: Icon(Icons.home_rounded),
-        label: 'Home',
-      ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.explore_outlined),
-        activeIcon: Icon(Icons.explore_rounded),
-        label: 'Explore',
-      ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.workspace_premium_outlined),
-        activeIcon: Icon(Icons.workspace_premium_rounded),
-        label: 'Certificates',
-      ),
-      const BottomNavigationBarItem(
-        icon: Icon(Icons.person_outline_rounded),
-        activeIcon: Icon(Icons.person_rounded),
-        label: 'Profile',
-      ),
+    final navItems = <FloatingNavItem>[
+      ...FloatingBottomNav.defaultItems,
       if (isAdmin)
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.admin_panel_settings_outlined),
-          activeIcon: Icon(Icons.admin_panel_settings_rounded),
+        const FloatingNavItem(
+          icon: Icons.admin_panel_settings_outlined,
+          activeIcon: Icons.admin_panel_settings_rounded,
           label: 'Admin',
         ),
     ];
@@ -81,32 +62,34 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
         } else {
           final shouldExit = _handleBackPress();
           if (shouldExit) {
-            // Let the system close the application
             Navigator.of(context).pop();
           }
         }
       },
       child: Scaffold(
-        body: Column(
+        extendBody: true,
+        body: Stack(
           children: [
-            const NetworkStatusBanner(),
-            Expanded(child: widget.navigationShell),
+            Column(
+              children: [
+                const NetworkStatusBanner(),
+                Expanded(child: widget.navigationShell),
+              ],
+            ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: FloatingBottomNav(
+                selectedIndex: currentIndex,
+                onItemSelected: (index) => widget.navigationShell.goBranch(
+                  index,
+                  initialLocation: index == widget.navigationShell.currentIndex,
+                ),
+                items: navItems,
+              ),
+            ),
           ],
-        ),
-        bottomNavigationBar: Container(
-          decoration: const BoxDecoration(
-            border: Border(
-              top: BorderSide(color: AppColors.border, width: 1),
-            ),
-          ),
-          child: BottomNavigationBar(
-            currentIndex: currentIndex,
-            onTap: (index) => widget.navigationShell.goBranch(
-              index,
-              initialLocation: index == widget.navigationShell.currentIndex,
-            ),
-            items: navItems,
-          ),
         ),
       ),
     );

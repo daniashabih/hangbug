@@ -56,7 +56,7 @@ class CertificatesScreen extends ConsumerWidget {
               ref.invalidate(certificatesProvider);
             },
             child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 96),
               itemCount: certificates.length + 1,
               separatorBuilder: (context, index) => const SizedBox(height: 16),
               itemBuilder: (context, index) {

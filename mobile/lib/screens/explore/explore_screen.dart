@@ -105,7 +105,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                           icon: Icons.search_off_rounded,
                         )
                       : ListView.separated(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                          padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 96.0),
                           itemCount: filtered.length,
                           separatorBuilder: (context, index) => const SizedBox(height: 10),
                           itemBuilder: (context, index) {

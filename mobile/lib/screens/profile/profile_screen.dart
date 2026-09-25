@@ -104,27 +104,89 @@ class ProfileScreen extends ConsumerWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
-                      color: isAdmin
-                          ? AppColors.primary.withValues(alpha: 0.12)
-                          : AppColors.accent.withValues(alpha: 0.12),
+                      color: user?.isGuest == true
+                          ? AppColors.warning.withValues(alpha: 0.12)
+                          : isAdmin
+                              ? AppColors.primary.withValues(alpha: 0.12)
+                              : AppColors.accent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isAdmin ? AppColors.primary : AppColors.accent,
+                        color: user?.isGuest == true
+                            ? AppColors.warning
+                            : isAdmin
+                                ? AppColors.primary
+                                : AppColors.accent,
                         width: 1,
                       ),
                     ),
                     child: Text(
-                      isAdmin ? 'ADMINISTRATOR' : 'CERTIFIED LEARNER',
+                      user?.isGuest == true
+                          ? 'GUEST TEST MODE'
+                          : isAdmin
+                              ? 'ADMINISTRATOR'
+                              : 'CERTIFIED LEARNER',
                       style: AppTextStyles.mono.copyWith(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        color: isAdmin ? AppColors.primary : AppColors.primaryDark,
+                        color: user?.isGuest == true
+                            ? Colors.orange.shade800
+                            : isAdmin
+                                ? AppColors.primary
+                                : AppColors.primaryDark,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
+
+            if (user?.isGuest == true) ...[
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.stars_rounded, color: AppColors.primary, size: 22),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Save Your Progress',
+                          style: AppTextStyles.labelBold.copyWith(
+                            color: AppColors.primaryDark,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Create a free account to permanently save your certificates, sync quiz scores, and appear on the global leaderboard.',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        minimumSize: const Size(double.infinity, 40),
+                      ),
+                      onPressed: () => context.push('/register'),
+                      child: const Text('Create Permanent Account'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
 
             const SizedBox(height: 20),
 
@@ -216,19 +278,22 @@ class ProfileScreen extends ConsumerWidget {
 
             const SizedBox(height: 24),
 
-            // Sign Out Button
+            // Sign Out / Exit Guest Mode Button
             ListTile(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
                 side: BorderSide(color: AppColors.error.withValues(alpha: 0.3)),
               ),
               tileColor: AppColors.error.withValues(alpha: 0.05),
-              leading: const Icon(Icons.logout_rounded, color: AppColors.error),
+              leading: Icon(
+                user?.isGuest == true ? Icons.exit_to_app_rounded : Icons.logout_rounded,
+                color: AppColors.error,
+              ),
               title: Text(
-                'Sign Out',
+                user?.isGuest == true ? 'Exit Guest Mode' : 'Sign Out',
                 style: AppTextStyles.labelBold.copyWith(color: AppColors.error),
               ),
-              onTap: () => _confirmSignOut(context, ref),
+              onTap: () => _confirmSignOut(context, ref, isGuest: user?.isGuest ?? false),
             ),
 
             const SizedBox(height: 16),
@@ -236,7 +301,7 @@ class ProfileScreen extends ConsumerWidget {
               'HangBug v1.0.0 (Build 1) • Production',
               style: AppTextStyles.bodySmall.copyWith(color: AppColors.textMuted),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 96),
           ],
         ),
       ),
@@ -326,13 +391,17 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  void _confirmSignOut(BuildContext context, WidgetRef ref) {
+  void _confirmSignOut(BuildContext context, WidgetRef ref, {bool isGuest = false}) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        title: const Text('Sign Out'),
-        content: const Text('Are you sure you want to sign out of HangBug?'),
+        title: Text(isGuest ? 'Exit Guest Mode?' : 'Sign Out'),
+        content: Text(
+          isGuest
+              ? 'Are you sure you want to exit guest mode? You will return to the sign-in screen.'
+              : 'Are you sure you want to sign out of HangBug?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
@@ -350,7 +419,7 @@ class ProfileScreen extends ConsumerWidget {
                 context.go('/login');
               }
             },
-            child: const Text('Sign Out'),
+            child: Text(isGuest ? 'Exit' : 'Sign Out'),
           ),
         ],
       ),

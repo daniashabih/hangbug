@@ -33,15 +33,18 @@ class ApiClient {
         onRequest: (options, handler) async {
           // Attach Authorization Bearer token from secure storage if present
           final token = await secureStorage.getToken();
-          if (token != null && token.isNotEmpty) {
+          if (token != null && token.isNotEmpty && token != 'guest_token') {
             options.headers['Authorization'] = 'Bearer $token';
           }
           return handler.next(options);
         },
-        onError: (DioException error, handler) {
-          // If token expired (401), secure credentials should be invalidated
+        onError: (DioException error, handler) async {
+          // If token expired (401), secure credentials should be invalidated (unless in guest mode)
           if (error.response?.statusCode == 401) {
-            secureStorage.clearAll();
+            final token = await secureStorage.getToken();
+            if (token != 'guest_token') {
+              secureStorage.clearAll();
+            }
           }
           return handler.next(error);
         },

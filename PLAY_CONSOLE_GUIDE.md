@@ -136,15 +136,15 @@ Google Play requires strict disclosure of all collected data:
 1. In Play Console, navigate to **Release $\rightarrow$ Production** (or **Testing $\rightarrow$ Internal testing** for initial testing).
 2. Click **Create new release**.
 3. Under **App bundles**, upload:
-   `mobile/build/app/outputs/bundle/release/app-release.aab`
-4. Enter **Release name:** `1.0.0 (1)`
+   `app-release.aab` (or `build\app\outputs\bundle\release\app-release.aab`)
+4. Enter **Release name:** `1.1.0 (4)`
 5. Enter **Release notes (en-US):**
    ```text
-   Initial official release of HangBug for Android!
-   - Take web development quizzes across popular technologies
-   - Earn verified certificates with scannable QR codes
-   - Track your learning journey with interactive dashboard metrics
-   - Smooth, modern Material 3 interface
+   What's new in HangBug 1.1.0:
+   - Guest Mode: Try quizzes and explore categories immediately without mandatory sign-up
+   - Local progress storage and seamless guest data transition upon login
+   - Sleek new floating navigation bar for smoother in-app browsing
+   - Upgraded Android SDK 36 target and R8 code optimization for faster startup
    ```
 6. Click **Next**, review release summary, and click **Save**.
 7. Submit for review!

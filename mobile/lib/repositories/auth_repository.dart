@@ -16,6 +16,14 @@ class AuthRepository {
     final token = await secureStorage.getToken();
     if (token == null || token.isEmpty) return null;
 
+    if (token == 'guest_token') {
+      final cachedJson = await secureStorage.getUserData();
+      if (cachedJson != null) {
+        return UserModel.fromJson(cachedJson);
+      }
+      return UserModel.guestUser;
+    }
+
     try {
       final user = await authService.getMe();
       await secureStorage.saveUserData(user.toJson());
@@ -28,6 +36,14 @@ class AuthRepository {
       }
       return null;
     }
+  }
+
+  // Start guest testing session
+  Future<UserModel> startGuestSession() async {
+    const guest = UserModel.guestUser;
+    await secureStorage.saveToken('guest_token');
+    await secureStorage.saveUserData(guest.toJson());
+    return guest;
   }
 
   // Login
@@ -68,7 +84,14 @@ class AuthRepository {
 
   // Logout
   Future<void> logout() async {
-    await authService.logout();
+    final token = await secureStorage.getToken();
+    if (token != null && token != 'guest_token') {
+      try {
+        await authService.logout();
+      } catch (_) {
+        // Ignore network errors on logout to ensure local wipe always proceeds
+      }
+    }
     await secureStorage.clearAll();
   }
 

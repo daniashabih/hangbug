@@ -2,13 +2,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/category_model.dart';
 import '../models/certificate_model.dart';
 import '../models/dashboard_model.dart';
+import 'auth_provider.dart';
 import 'core_providers.dart';
 
 // User Dashboard Data Provider
 final userDashboardProvider =
     FutureProvider.autoDispose<UserDashboardModel>((ref) async {
+  final authState = ref.watch(authProvider);
   final repository = ref.watch(dashboardRepositoryProvider);
-  return await repository.getUserDashboard();
+  return await repository.getUserDashboard(isGuest: authState.isGuest);
 });
 
 // Categories / Technologies Provider
@@ -21,6 +23,7 @@ final categoriesProvider =
 // Certificates Provider
 final certificatesProvider =
     FutureProvider.autoDispose<List<CertificateModel>>((ref) async {
+  final authState = ref.watch(authProvider);
   final repository = ref.watch(dashboardRepositoryProvider);
-  return await repository.getCertificates();
+  return await repository.getCertificates(isGuest: authState.isGuest);
 });

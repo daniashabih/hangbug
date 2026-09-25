@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/question_model.dart';
 import '../models/quiz_result_model.dart';
+import 'auth_provider.dart';
 import 'core_providers.dart';
+import 'dashboard_provider.dart';
 
 class QuizState {
   final String category;
@@ -220,6 +222,8 @@ class QuizNotifier extends StateNotifier<QuizState> {
       timeTakenSeconds: durationSeconds,
     );
 
+    final isGuest = _ref.read(authProvider).isGuest;
+
     try {
       final repository = _ref.read(quizRepositoryProvider);
       final result = await repository.saveResult(
@@ -228,7 +232,13 @@ class QuizNotifier extends StateNotifier<QuizState> {
         score: score,
         total: total,
         percentage: percentage,
+        isGuest: isGuest,
       );
+
+      if (isGuest) {
+        _ref.invalidate(userDashboardProvider);
+        _ref.invalidate(certificatesProvider);
+      }
 
       state = state.copyWith(
         isLoading: false,
@@ -239,7 +249,9 @@ class QuizNotifier extends StateNotifier<QuizState> {
     } catch (e) {
       // Create local fallback result if network error occurs while submitting
       final fallbackResult = QuizResultModel(
-        id: 'HB-OFFLINE-${DateTime.now().millisecondsSinceEpoch}',
+        id: isGuest
+            ? 'HB-GUEST-${DateTime.now().millisecondsSinceEpoch}'
+            : 'HB-OFFLINE-${DateTime.now().millisecondsSinceEpoch}',
         category: state.category,
         session: state.session,
         score: score,
@@ -247,6 +259,11 @@ class QuizNotifier extends StateNotifier<QuizState> {
         percentage: percentage,
         createdAt: DateTime.now().toIso8601String(),
       );
+
+      if (isGuest) {
+        _ref.invalidate(userDashboardProvider);
+        _ref.invalidate(certificatesProvider);
+      }
 
       state = state.copyWith(
         isLoading: false,

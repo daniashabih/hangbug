@@ -41,6 +41,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _handleGuestLogin() async {
+    FocusScope.of(context).unfocus();
+    final success = await ref.read(authProvider.notifier).continueAsGuest();
+    if (success && mounted) {
+      context.go('/home');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
@@ -172,6 +180,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       text: 'Sign In',
                       onPressed: _handleLogin,
                       isLoading: authState.isLoading,
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    // Divider
+                    Row(
+                      children: [
+                        const Expanded(child: Divider()),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          child: Text(
+                            'OR',
+                            style: AppTextStyles.mono.copyWith(
+                              fontSize: 11,
+                              color: AppColors.textMuted,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        const Expanded(child: Divider()),
+                      ],
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    // Continue as Guest Button
+                    AppButton(
+                      text: 'Continue as Guest',
+                      type: AppButtonType.secondary,
+                      icon: Icons.person_outline_rounded,
+                      onPressed: _handleGuestLogin,
+                      isLoading: authState.isLoading,
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Text(
+                      'Explore quizzes and test certification features without signing in',
+                      textAlign: TextAlign.center,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textMuted,
+                        fontSize: 11,
+                      ),
                     ),
 
                     const SizedBox(height: 24),

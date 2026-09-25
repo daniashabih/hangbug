@@ -8,11 +8,17 @@ import '../repositories/quiz_repository.dart';
 import '../services/admin_service.dart';
 import '../services/auth_service.dart';
 import '../services/dashboard_service.dart';
+import '../services/guest_storage_service.dart';
 import '../services/quiz_service.dart';
 
 // Storage Provider
 final secureStorageProvider = Provider<SecureStorageService>((ref) {
   return SecureStorageService();
+});
+
+// Guest Storage Provider
+final guestStorageServiceProvider = Provider<GuestStorageService>((ref) {
+  return GuestStorageService();
 });
 
 // ApiClient Provider
@@ -41,7 +47,8 @@ final quizServiceProvider = Provider<QuizService>((ref) {
 
 final quizRepositoryProvider = Provider<QuizRepository>((ref) {
   final service = ref.watch(quizServiceProvider);
-  return QuizRepository(quizService: service);
+  final guestStorage = ref.watch(guestStorageServiceProvider);
+  return QuizRepository(quizService: service, guestStorage: guestStorage);
 });
 
 // Dashboard Providers
@@ -52,7 +59,11 @@ final dashboardServiceProvider = Provider<DashboardService>((ref) {
 
 final dashboardRepositoryProvider = Provider<DashboardRepository>((ref) {
   final service = ref.watch(dashboardServiceProvider);
-  return DashboardRepository(dashboardService: service);
+  final guestStorage = ref.watch(guestStorageServiceProvider);
+  return DashboardRepository(
+    dashboardService: service,
+    guestStorage: guestStorage,
+  );
 });
 
 // Admin Providers

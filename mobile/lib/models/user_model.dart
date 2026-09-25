@@ -17,7 +17,16 @@ class UserModel {
     this.createdAt,
   });
 
+  static const UserModel guestUser = UserModel(
+    id: 'guest',
+    name: 'Guest Tester',
+    email: 'guest@hangbug.test',
+    role: 'guest',
+    isVerified: false,
+  );
+
   bool get isAdmin => role == 'admin';
+  bool get isGuest => id == 'guest' || role == 'guest';
 
   String get initials {
     if (name.trim().isEmpty) return 'U';
