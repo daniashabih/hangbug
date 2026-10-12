@@ -53,22 +53,21 @@ final routerProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/splash',
+    initialLocation: '/login',
     refreshListenable: notifier,
     redirect: (context, state) {
       final auth = ref.read(authProvider);
       final currentLoc = state.uri.path;
 
-      // Allow splash screen while initializing
-      if (!auth.isInitialized) {
-        return currentLoc == '/splash' ? null : '/splash';
-      }
-
       final isAuth = auth.isAuthenticated;
       final isAdmin = auth.isAdmin;
 
-      final isPublicRoute = currentLoc == '/splash' ||
-          currentLoc == '/login' ||
+      // Immediately redirect /splash to destination
+      if (currentLoc == '/splash') {
+        return isAuth ? '/home' : '/login';
+      }
+
+      final isPublicRoute = currentLoc == '/login' ||
           currentLoc == '/register' ||
           currentLoc == '/forgot-password' ||
           currentLoc.startsWith('/legal');
@@ -91,7 +90,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      // Splash
+      // Splash (instant pass-through if visited)
       GoRoute(
         path: '/splash',
         parentNavigatorKey: _rootNavigatorKey,

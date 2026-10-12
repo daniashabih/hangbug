@@ -251,56 +251,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
             ],
           ),
           actions: [
-            // Timer Badge
             if (!state.isLoading && state.questions.isNotEmpty) ...[
-              Container(
-                margin: const EdgeInsets.symmetric(vertical: 10),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: state.timeLeft <= 10
-                      ? AppColors.errorBg
-                      : state.timeLeft <= 20
-                          ? AppColors.warningBg
-                          : AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(
-                    color: state.timeLeft <= 10
-                        ? AppColors.error
-                        : state.timeLeft <= 20
-                            ? AppColors.warning
-                            : AppColors.primary.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.timer_outlined,
-                      size: 14,
-                      color: state.timeLeft <= 10
-                          ? AppColors.error
-                          : state.timeLeft <= 20
-                              ? AppColors.warning
-                              : AppColors.primary,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${state.timeLeft}s',
-                      style: AppTextStyles.mono.copyWith(
-                        color: state.timeLeft <= 10
-                            ? AppColors.error
-                            : state.timeLeft <= 20
-                                ? AppColors.warning
-                                : AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 6),
-
               // Question Matrix Grid button
               IconButton(
                 icon: const Icon(Icons.grid_view_rounded, size: 20),

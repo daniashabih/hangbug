@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/question_model.dart';
 import '../models/quiz_result_model.dart';
@@ -13,8 +12,6 @@ class QuizState {
   final int currentIndex;
   final Map<String, int> selectedAnswers;
   final Set<String> flaggedQuestions;
-  final int timeLeft;
-  final int timePerQuestion;
   final bool isLoading;
   final bool isSubmitted;
   final QuizResultModel? lastResult;
@@ -28,8 +25,6 @@ class QuizState {
     this.currentIndex = 0,
     this.selectedAnswers = const {},
     this.flaggedQuestions = const {},
-    this.timeLeft = 60,
-    this.timePerQuestion = 60,
     this.isLoading = false,
     this.isSubmitted = false,
     this.lastResult,
@@ -55,8 +50,6 @@ class QuizState {
     int? currentIndex,
     Map<String, int>? selectedAnswers,
     Set<String>? flaggedQuestions,
-    int? timeLeft,
-    int? timePerQuestion,
     bool? isLoading,
     bool? isSubmitted,
     QuizResultModel? lastResult,
@@ -71,8 +64,6 @@ class QuizState {
       currentIndex: currentIndex ?? this.currentIndex,
       selectedAnswers: selectedAnswers ?? this.selectedAnswers,
       flaggedQuestions: flaggedQuestions ?? this.flaggedQuestions,
-      timeLeft: timeLeft ?? this.timeLeft,
-      timePerQuestion: timePerQuestion ?? this.timePerQuestion,
       isLoading: isLoading ?? this.isLoading,
       isSubmitted: isSubmitted ?? this.isSubmitted,
       lastResult: lastResult ?? this.lastResult,
@@ -84,14 +75,12 @@ class QuizState {
 
 class QuizNotifier extends StateNotifier<QuizState> {
   final Ref _ref;
-  Timer? _timer;
   DateTime? _quizStartTime;
 
   QuizNotifier(this._ref) : super(const QuizState());
 
   @override
   void dispose() {
-    _timer?.cancel();
     super.dispose();
   }
 
@@ -99,15 +88,11 @@ class QuizNotifier extends StateNotifier<QuizState> {
   Future<void> startQuiz({
     required String category,
     required int session,
-    int timePerQuestion = 60,
   }) async {
-    _timer?.cancel();
     state = QuizState(
       category: category,
       session: session,
       isLoading: true,
-      timePerQuestion: timePerQuestion,
-      timeLeft: timePerQuestion,
     );
 
     try {
@@ -124,32 +109,13 @@ class QuizNotifier extends StateNotifier<QuizState> {
       state = state.copyWith(
         questions: questions,
         isLoading: false,
-        timeLeft: timePerQuestion,
       );
-
-      _startTimer();
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: e.toString(),
       );
     }
-  }
-
-  void _startTimer() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (state.timeLeft <= 1) {
-        // Auto-advance on timeout
-        if (!state.isLastQuestion) {
-          nextQuestion();
-        } else {
-          submitQuiz();
-        }
-      } else {
-        state = state.copyWith(timeLeft: state.timeLeft - 1);
-      }
-    });
   }
 
   void selectAnswer(String questionId, int optionIndex) {
@@ -172,7 +138,6 @@ class QuizNotifier extends StateNotifier<QuizState> {
     if (state.currentIndex < state.questions.length - 1) {
       state = state.copyWith(
         currentIndex: state.currentIndex + 1,
-        timeLeft: state.timePerQuestion,
       );
     }
   }
@@ -181,7 +146,6 @@ class QuizNotifier extends StateNotifier<QuizState> {
     if (state.currentIndex > 0) {
       state = state.copyWith(
         currentIndex: state.currentIndex - 1,
-        timeLeft: state.timePerQuestion,
       );
     }
   }
@@ -190,14 +154,12 @@ class QuizNotifier extends StateNotifier<QuizState> {
     if (index >= 0 && index < state.questions.length) {
       state = state.copyWith(
         currentIndex: index,
-        timeLeft: state.timePerQuestion,
       );
     }
   }
 
   // Calculate score and submit assessment to MongoDB Atlas via backend
   Future<QuizResultModel?> submitQuiz() async {
-    _timer?.cancel();
     int score = 0;
 
     for (final q in state.questions) {
@@ -275,7 +237,6 @@ class QuizNotifier extends StateNotifier<QuizState> {
   }
 
   void resetQuiz() {
-    _timer?.cancel();
     state = const QuizState();
   }
 }
